@@ -4,29 +4,30 @@ const path = require("path");
 const { generateHtml } = require("./utils/generateHtml");
 
 async function init() {
-  try {
-    const answers = await inquirer.prompt(employeeQuestions).then((answers) => {
-      if (answers.position === "manager") {
-        inquirer.prompt(managerQuestions);
-      }
-      if (answers.position === "intern") {
-        inquirer.prompt(internQuestions);
-      }
-      if (answers.position === "engineer") {
-        inquirer.prompt(engineerQuestions);
-      }
-    });
-    console.log(answers);
-    if (answers) {
-      const html = generateHtml(answers);
-      writeToFile("index.html", html);
-    }
-  } catch (err) {
-    console.error(err);
-  }
+  const teamArray = [];
+  // try {
+  //   const answers = await inquirer.prompt(employeeQuestions).then((answers) => {
+  //     if (answers.position === "Manager") {
+  //       inquirer.prompt(ManagerQuestions);
+  //     }
+  //     if (answers.position === "intern") {
+  //       inquirer.prompt(internQuestions);
+  //     }
+  //     if (answers.position === "engineer") {
+  //       inquirer.prompt(engineerQuestions);
+  //     }
+  //   });
+  //   console.log(answers);
+  //   if (answers) {
+  //     const html = generateHtml(answers);
+  //     writeToFile("index.html", html);
+  //   }
+  // } catch (err) {
+  //   console.error(err);
+  // }
 
   function createManager() {
-    console.log("This is a new manager");
+    console.log("This is a new Manager");
     inquirer
       .prompt([
         {
@@ -49,7 +50,7 @@ async function init() {
           name: "position",
           type: "list",
           message: "What is your position?",
-          choices: ["manager", "intern", "engineer"],
+          choices: ["Manager", "intern", "engineer"],
         },
 
         {
@@ -59,13 +60,14 @@ async function init() {
         },
       ])
       .then((newManager) => {
-        const managerClass = new manager(
+        const ManagerClass = new Manager(
           newManager.id,
           newManager.name,
           newManager.email,
           newManager.position,
           newManager.officenumber
         );
+        teamArray.push(ManagerClass);
       });
   }
 
@@ -93,7 +95,7 @@ async function init() {
           name: "position",
           type: "list",
           message: "What is your position?",
-          choices: ["manager", "intern", "engineer"],
+          choices: ["Manager", "intern", "engineer"],
         },
 
         {
@@ -110,6 +112,7 @@ async function init() {
           newIntern.position,
           newIntern.school
         );
+        teamArray.push(internClass);
       });
   }
 
@@ -137,7 +140,7 @@ async function init() {
           name: "position",
           type: "list",
           message: "What is your position?",
-          choices: ["manager", "intern", "engineer"],
+          choices: ["Manager", "intern", "engineer"],
         },
 
         {
@@ -154,6 +157,12 @@ async function init() {
           newEngineer.position,
           newEngineer.username
         );
+        teamArray.push(engineerClass);
+      })
+      .catch((err) => {
+        console.error(err);
+        process.exitCode = 1;
+        process.exit();
       });
   }
 
@@ -163,24 +172,32 @@ async function init() {
         name: "add a team member",
         type: "list",
         message: "What team member do you want to add?",
-        choices: ["manager", "intern", "engineer", "none"],
+        choices: ["Manager", "intern", "engineer", "none"],
       },
 
       then((newTeamMember) => {
-        switch (("intern", "engineer", "none")) {
+        switch (newTeamMember) {
           case "intern":
-            createIntern()
+            createIntern();
             break;
           case "engineer":
-            createEngineer()
-            break
-
-          default:
+            createEngineer();
+            break;
+          case "Manager":
+            createManager();
             break;
 
+          default:
+            generateHtml();
+
+            process.exitCode = 0;
+            process.exit();
         }
       })
     );
   }
+
+  createTeam();
 }
 
+init();
